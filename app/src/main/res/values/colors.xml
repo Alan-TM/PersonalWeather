@@ -7,4 +7,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="blue_dark">#060E3D</color>
+    <color name="blue_marine">#165470</color>
+    <color name="main_bg">#F4F4F6</color>
+    <color name="highlight_text">#5E63BC</color>
+    <color name="temperature_highlight">#1A237E</color>
+    <color name="gray">#706F6F</color>
+    <color name="headline_card_view_bg">#5772FE</color>
 </resources>
