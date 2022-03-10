@@ -1,12 +1,11 @@
-package mx.kodemia.personalweather
+package mx.kodemia.personalweather.ui.settings
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceFragmentCompat
-import mx.kodemia.personalweather.databinding.ActivityMainBinding
+import mx.kodemia.personalweather.R
 
 class SettingsFragment : PreferenceFragmentCompat() {
 

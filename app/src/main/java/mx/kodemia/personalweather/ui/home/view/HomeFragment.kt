@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather
+package mx.kodemia.personalweather.ui.home.view
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -19,18 +19,19 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import mx.kodemia.personalweather.BuildConfig.APPLICATION_ID
+import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.databinding.FragmentHomeBinding
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
 import mx.kodemia.personalweather.utils.CustomSnackbar
 import mx.kodemia.personalweather.utils.checkForInternet
 import mx.kodemia.personalweather.utils.showIconHelper
-import mx.kodemia.personalweather.viewmodel.HomeViewModel
+import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -48,7 +49,7 @@ class HomeFragment : Fragment() {
     private var units = false
     private var language = false
 
-    private val viewModel: HomeViewModel by activityViewModels()
+    private val viewModel: HomeViewModel by viewModels()
 
     private lateinit var customSnackbar: CustomSnackbar
 
@@ -78,7 +79,7 @@ class HomeFragment : Fragment() {
         language = sharedPreferences.getBoolean("language", false)
 
         onRefreshAPICall()
-        observers()
+        apiResponseObservers()
     }
 
     override fun onDestroy() {
@@ -96,7 +97,7 @@ class HomeFragment : Fragment() {
                 }
             }
         } else{
-            showError(getString(R.string.no_internet_access))
+            showMessage(getString(R.string.no_internet_access))
         }
     }
 
@@ -111,7 +112,7 @@ class HomeFragment : Fragment() {
 
     private fun setupViewData(location: Location) {
         // Se coloca en este punto para permitir su ejecución
-        showIndicator(true)
+        showLoadingIndicator(true)
         latitude = location.latitude.toString()
         longitude = location.longitude.toString()
         var unit = "metric"
@@ -128,7 +129,7 @@ class HomeFragment : Fragment() {
 
     }
 
-    private fun observers() {
+    private fun apiResponseObservers() {
         viewModel.cityResponse.observe(viewLifecycleOwner) { city ->
             formatCityText(city)
         }
@@ -138,7 +139,7 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) {
-            showIndicator(it)
+            showLoadingIndicator(it)
             if (!it)
                 applyAnimations()
         }
@@ -185,7 +186,6 @@ class HomeFragment : Fragment() {
 
             binding.apply {
                 iconImageView.load(showIconHelper(icon))
-                //recuerda cambiarlo a address cuando cambien al binding de main activity !!!
                 dateTextView.text = updateAt
                 temperatureTextView.text = temp
                 statusTextView.text = status
@@ -199,15 +199,15 @@ class HomeFragment : Fragment() {
                 feelsLikeTextView.text = feelsLike
             }
         } catch (exception: Exception) {
-            showError(getString(R.string.error_ocurred))
+            showMessage(getString(R.string.error_ocurred))
         }
     }
 
-    private fun showError(message: String) {
+    private fun showMessage(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
     }
 
-    private fun showIndicator(visible: Boolean) {
+    private fun showLoadingIndicator(visible: Boolean) {
         with(binding){
             progressBarIndicator.isVisible = visible
             headlineCardView.isVisible = !visible
@@ -236,7 +236,6 @@ class HomeFragment : Fragment() {
 
     @SuppressLint("MissingPermission")
     private fun getLastLocation(onLocation: (location: Location) -> Unit) {
-        Log.d(TAG, "Aquí estoy: $latitude Long: $longitude")
         fusedLocationClient.lastLocation
             .addOnCompleteListener { taskLocation ->
                 if (taskLocation.isSuccessful && taskLocation.result != null) {
@@ -245,8 +244,6 @@ class HomeFragment : Fragment() {
 
                     latitude = location?.latitude.toString()
                     longitude = location?.longitude.toString()
-                    Log.d(TAG, "GetLasLoc Lat: $latitude Long: $longitude")
-
                     onLocation(taskLocation.result)
                 } else {
                     Log.w(TAG, "getLastLocation:exception", taskLocation.exception)

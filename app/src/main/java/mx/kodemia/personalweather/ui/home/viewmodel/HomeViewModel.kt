@@ -1,18 +1,13 @@
-package mx.kodemia.personalweather.viewmodel
+package mx.kodemia.personalweather.ui.home.viewmodel
 
 import android.app.Application
-import android.app.Service
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
 import mx.kodemia.personalweather.network.service.ServiceNetwork
-import mx.kodemia.personalweather.utils.checkForInternet
 import java.lang.Exception
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
