@@ -17,7 +17,6 @@ import java.lang.Exception
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val serviceNetwork = ServiceNetwork()
-    private lateinit var sharedPreferences: SharedPreferences
     private val appid = "30ba6cd1ad33ea67e2dfd78a8d28ae62"
 
     val isLoading = MutableLiveData<Boolean>()

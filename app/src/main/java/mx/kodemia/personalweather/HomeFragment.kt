@@ -57,15 +57,6 @@ class HomeFragment : Fragment() {
      */
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private fun onRefreshAPICall() {
-        with(binding.swipeRefreshRootLayout) {
-            setOnRefreshListener {
-                //showError("Actualizado")
-                this.isRefreshing = false
-            }
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -80,14 +71,7 @@ class HomeFragment : Fragment() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-        if (!checkPermissions()) {
-            requestPermissions()
-        } else {
-            // despues de que se obtiene la location se ejecuta el setUpViewData con esa location
-            getLastLocation() { location ->
-                setupViewData(location)
-            }
-        }
+        permissionsSetup()
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         units = sharedPreferences.getBoolean("units", false)
@@ -102,28 +86,46 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private fun setupViewData(location: Location) {
-
-        if (checkForInternet(requireContext())) {
-            // Se coloca en este punto para permitir su ejecución
-            showIndicator(true)
-            latitude = location.latitude.toString()
-            longitude = location.longitude.toString()
-            var unit = "metric"
-            var languageCode = "es"
-
-            if (units) {
-                unit = "imperial"
+    private fun permissionsSetup() {
+        if(checkForInternet(requireContext())) {
+            if (!checkPermissions()) {
+                requestPermissions()
+            } else {
+                getLastLocation() { location ->
+                    setupViewData(location)
+                }
             }
-            if (language) {
-                languageCode = "en"
-            }
-
-            viewModel.getCityAndWeather(latitude, longitude, unit, languageCode)
-        } else {
+        } else{
             showError(getString(R.string.no_internet_access))
-            binding.detailsContainer.isVisible = false
         }
+    }
+
+    private fun onRefreshAPICall() {
+        with(binding.swipeRefreshRootLayout) {
+            setOnRefreshListener {
+                permissionsSetup()
+                this.isRefreshing = false
+            }
+        }
+    }
+
+    private fun setupViewData(location: Location) {
+        // Se coloca en este punto para permitir su ejecución
+        showIndicator(true)
+        latitude = location.latitude.toString()
+        longitude = location.longitude.toString()
+        var unit = "metric"
+        var languageCode = "es"
+
+        if (units) {
+            unit = "imperial"
+        }
+        if (language) {
+            languageCode = "en"
+        }
+
+        viewModel.getCityAndWeather(latitude, longitude, unit, languageCode)
+
     }
 
     private fun observers() {
@@ -131,13 +133,13 @@ class HomeFragment : Fragment() {
             formatCityText(city)
         }
 
-        viewModel.weatherResponse.observe(viewLifecycleOwner){weather ->
+        viewModel.weatherResponse.observe(viewLifecycleOwner) { weather ->
             formatWeatherResponse(weather)
         }
 
-        viewModel.isLoading.observe(viewLifecycleOwner){
+        viewModel.isLoading.observe(viewLifecycleOwner) {
             showIndicator(it)
-            if(!it)
+            if (!it)
                 applyAnimations()
         }
     }
@@ -146,7 +148,7 @@ class HomeFragment : Fragment() {
      * Función para mostrar los datos obtenidos de OpenWeather
      */
 
-    private fun formatCityText(city: City){
+    private fun formatCityText(city: City) {
         binding.addressTextView.text = getString(R.string.city, city.name, city.country)
     }
 
@@ -206,8 +208,12 @@ class HomeFragment : Fragment() {
     }
 
     private fun showIndicator(visible: Boolean) {
-        binding.progressBarIndicator.isVisible = visible
-        binding.detailsContainer.isVisible = !visible
+        with(binding){
+            progressBarIndicator.isVisible = visible
+            headlineCardView.isVisible = !visible
+            detailsContainer.isVisible = !visible
+            addressTextView.isVisible = !visible
+        }
     }
 
     private fun applyAnimations() {
