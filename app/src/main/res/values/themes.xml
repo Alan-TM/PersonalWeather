@@ -14,4 +14,13 @@
         <item name="android:windowLightStatusBar" tools:targetApi="M">true</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="Theme.PersonalWeather.Splash" parent="Theme.SplashScreen">
+        <!--Color de fondo e icono-->
+        <item name="windowSplashScreenBackground">@color/main_bg</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/partly_cloudy_day</item>
+
+        <!--tema definido que se usara en el resto de la app-->
+        <item name="postSplashScreenTheme">@style/Theme.PersonalWeather</item>
+    </style>
 </resources>
