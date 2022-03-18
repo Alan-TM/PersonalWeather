@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.model
+package mx.kodemia.personalweather.model.weather
 
 import mx.kodemia.personalweather.model.weather.Weather
 

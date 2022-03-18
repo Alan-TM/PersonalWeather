@@ -1,7 +1,5 @@
 package mx.kodemia.personalweather.model.weather
 
-import mx.kodemia.personalweather.model.Current
-
 data class WeatherEntity(
     val current: Current
 )

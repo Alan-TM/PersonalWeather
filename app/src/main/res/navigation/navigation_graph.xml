@@ -7,9 +7,8 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="mx.kodemia.personalweather.HomeFragment"
-        android:label="Personal Weather"
-        tools:layout="@layout/fragment_home">
+        android:name="mx.kodemia.personalweather.ui.home.view.HomeFragment"
+        android:label="Personal Weather">
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
@@ -18,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="mx.kodemia.personalweather.SettingsFragment"
+        android:name="mx.kodemia.personalweather.ui.settings.SettingsFragment"
         android:label="@string/settings">
         <action
             android:id="@+id/action_settingsFragment_to_homeFragment"

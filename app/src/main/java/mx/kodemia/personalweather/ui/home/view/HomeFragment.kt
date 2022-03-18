@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather
+package mx.kodemia.personalweather.ui.home.view
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -19,40 +19,28 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentTabHost
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mx.kodemia.personalweather.BuildConfig.APPLICATION_ID
+import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.databinding.FragmentHomeBinding
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
-import mx.kodemia.personalweather.network.service.WeatherService
+import mx.kodemia.personalweather.utils.CustomSnackbar
 import mx.kodemia.personalweather.utils.checkForInternet
 import mx.kodemia.personalweather.utils.showIconHelper
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val TAG = "MainActivityError"
+private const val REQUEST_PERMISSIONS_REQUEST_CODE = 34
 
 class HomeFragment : Fragment() {
-    private var param1: String? = null
-    private var param2: String? = null
-
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
-    private val TAG = "MainActivityError"
-    private val REQUEST_PERMISSIONS_REQUEST_CODE = 34
 
     private var latitude = ""
     private var longitude = ""
@@ -60,27 +48,14 @@ class HomeFragment : Fragment() {
     private var units = false
     private var language = false
 
+    private val viewModel: HomeViewModel by viewModels()
+
+    private lateinit var customSnackbar: CustomSnackbar
+
     /**
      * Punto de entrada para el API Fused Location Provider.
      */
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
-
-    private fun onRefreshAPICall() {
-        with(binding.swipeRefreshRootLayout) {
-            setOnRefreshListener {
-                //showError("Actualizado")
-                this.isRefreshing = false
-            }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -92,23 +67,18 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        customSnackbar = CustomSnackbar(requireActivity())
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-        if (!checkPermissions()) {
-            requestPermissions()
-        } else {
-            // despues de que se obtiene la location se ejecuta el setUpViewData con esa location
-            getLastLocation() { location ->
-                setupViewData(location)
-            }
-        }
+        permissionsSetup()
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         units = sharedPreferences.getBoolean("units", false)
         language = sharedPreferences.getBoolean("language", false)
 
         onRefreshAPICall()
+        apiResponseObservers()
     }
 
     override fun onDestroy() {
@@ -116,35 +86,33 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    private fun permissionsSetup() {
+        if(checkForInternet(requireContext())) {
+            if (!checkPermissions()) {
+                requestPermissions()
+            } else {
+                getLastLocation() { location ->
+                    setupViewData(location)
                 }
             }
-    }
-
-    private fun setupViewData(location: Location) {
-
-        if (checkForInternet(requireContext())) {
-            // Se coloca en este punto para permitir su ejecución
-            showIndicator(true)
-            lifecycleScope.launch {
-                latitude = location.latitude.toString()
-                longitude = location.longitude.toString()
-                formatResponse(getWeather(), getCitiesByLatLon())
-            }
-        } else {
-            showError(getString(R.string.no_internet_access))
-            binding.detailsContainer.isVisible = false
+        } else{
+            showMessage(getString(R.string.no_internet_access))
         }
     }
 
-    private suspend fun getWeather(): WeatherEntity = withContext(Dispatchers.IO) {
-        Log.e(TAG, "CORR Lat: $latitude Long: $longitude")
+    private fun onRefreshAPICall() {
+        with(binding.swipeRefreshRootLayout) {
+            setOnRefreshListener {
+                permissionsSetup()
+                this.isRefreshing = false
+            }
+        }
+    }
+
+    private fun setupViewData(location: Location) {
+        showLoadingIndicator(true)
+        latitude = location.latitude.toString()
+        longitude = location.longitude.toString()
         var unit = "metric"
         var languageCode = "es"
 
@@ -154,51 +122,46 @@ class HomeFragment : Fragment() {
         if (language) {
             languageCode = "en"
         }
-        // showIndicator(true)
-        val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openweathermap.org/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
 
-        val service: WeatherService = retrofit.create(WeatherService::class.java)
+        viewModel.getCityAndWeather(latitude, longitude, unit, languageCode)
+        Log.e("LOCATION", "$latitude, $longitude")
 
-        service.getWeatherById(
-            latitude,
-            longitude,
-            unit,
-            languageCode,
-            "30ba6cd1ad33ea67e2dfd78a8d28ae62"
-        )
     }
 
-    suspend fun getCitiesByLatLon(): City =
-        withContext(Dispatchers.IO) {
-            val retrofit: Retrofit = Retrofit.Builder()
-                .baseUrl("https://api.openweathermap.org/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-            val service: WeatherService = retrofit.create(WeatherService::class.java)
-
-            service.getCitiesByLatLon(latitude, longitude, "88d676ed50920fa123c15777f87f3955").first()
+    private fun apiResponseObservers() {
+        viewModel.cityResponse.observe(viewLifecycleOwner) { city ->
+            formatCityText(city)
         }
+
+        viewModel.weatherResponse.observe(viewLifecycleOwner) { weather ->
+            formatWeatherResponse(weather)
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            showLoadingIndicator(it)
+            if (!it)
+                applyAnimations()
+        }
+    }
 
     /**
      * Función para mostrar los datos obtenidos de OpenWeather
      */
 
-    private fun formatResponse(weatherEntity: WeatherEntity, city: City) {
-        var unitSymbol = "ºC"
+    private fun formatCityText(city: City) {
+        binding.addressTextView.text = getString(R.string.city, city.name, city.country)
+    }
 
-        if (units) {
-            unitSymbol = "ºF"
-        }
+    private fun formatWeatherResponse(weatherEntity: WeatherEntity) {
+        val unitSymbol = if (units) "ºF" else "ºC"
 
         try {
-            val temp = "${weatherEntity.current.temp.toInt()}$unitSymbol"
-            val cityName = city.name //weatherEntity.name
-            val country = city.country //weatherEntity.sys.country
-            val address = "$cityName, $country"
+            val temp = "${weatherEntity.current.temp.toInt()} $unitSymbol"
+            val dt = weatherEntity.current.dt
+            val updateAt = getString(
+                R.string.updatedAt,
+                SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(dt * 1000))
+            )
             val tempMin = "" //"Mín: ${weatherEntity.main.temp_min.toInt()}º"
             val tempMax = "" //""Max: ${weatherEntity.main.temp_max.toInt()}º"
             // Capitalizar la primera letra de la descripción
@@ -207,11 +170,6 @@ class HomeFragment : Fragment() {
             if (weatherDescription.isNotEmpty()) {
                 status = (weatherDescription[0].uppercaseChar() + weatherDescription.substring(1))
             }
-            val dt = weatherEntity.current.dt
-            val updatedAt = getString(R.string.updatedAt) + SimpleDateFormat(
-                "hh:mm a",
-                Locale.ENGLISH
-            ).format(Date(dt * 1000))
             val sunrise = weatherEntity.current.sunrise
             val sunriseFormat =
                 SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunrise * 1000))
@@ -224,12 +182,10 @@ class HomeFragment : Fragment() {
             val feelsLike =
                 getString(R.string.sensation) + weatherEntity.current.feels_like.toInt() + unitSymbol
             val icon = weatherEntity.current.weather[0].icon
-            val iconUrl = "https://openweathermap.org/img/w/$icon.png"
 
             binding.apply {
                 iconImageView.load(showIconHelper(icon))
-                addressTextView.text = address
-                dateTextView.text = updatedAt
+                dateTextView.text = updateAt
                 temperatureTextView.text = temp
                 statusTextView.text = status
                 tempMinTextView.text = tempMin
@@ -239,32 +195,33 @@ class HomeFragment : Fragment() {
                 windTextView.text = wind
                 pressureTextView.text = pressure
                 humidityTextView.text = humidity
-                detailsContainer.isVisible = true
                 feelsLikeTextView.text = feelsLike
             }
-
-            applyAnimations()
-            showIndicator(false)
         } catch (exception: Exception) {
-            showError(getString(R.string.error_ocurred))
-            Log.e("Error format", "Ha ocurrido un error")
-            showIndicator(false)
+            showMessage(getString(R.string.error_ocurred))
         }
     }
 
-    private fun showError(message: String) {
+    private fun showMessage(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
     }
 
-    private fun showIndicator(visible: Boolean) {
-        binding.progressBarIndicator.isVisible = visible
+    private fun showLoadingIndicator(visible: Boolean) {
+        with(binding){
+            progressBarIndicator.isVisible = visible
+            headlineCardView.isVisible = !visible
+            detailsContainer.isVisible = !visible
+            addressTextView.isVisible = !visible
+        }
     }
 
     private fun applyAnimations() {
-        val cvAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.headline_card_view_fade_in)
+        val cvAnimation =
+            AnimationUtils.loadAnimation(requireContext(), R.anim.headline_card_view_fade_in)
         binding.headlineCardView.animation = cvAnimation
 
-        val detailsSlideRightAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.details_slide_in)
+        val detailsSlideRightAnimation =
+            AnimationUtils.loadAnimation(requireContext(), R.anim.details_slide_in)
         binding.detailsCardView.animation = detailsSlideRightAnimation
         binding.tempMinTextView.animation = detailsSlideRightAnimation
 
@@ -278,7 +235,6 @@ class HomeFragment : Fragment() {
 
     @SuppressLint("MissingPermission")
     private fun getLastLocation(onLocation: (location: Location) -> Unit) {
-        Log.d(TAG, "Aquí estoy: $latitude Long: $longitude")
         fusedLocationClient.lastLocation
             .addOnCompleteListener { taskLocation ->
                 if (taskLocation.isSuccessful && taskLocation.result != null) {
@@ -287,12 +243,10 @@ class HomeFragment : Fragment() {
 
                     latitude = location?.latitude.toString()
                     longitude = location?.longitude.toString()
-                    Log.d(TAG, "GetLasLoc Lat: $latitude Long: $longitude")
-
                     onLocation(taskLocation.result)
                 } else {
                     Log.w(TAG, "getLastLocation:exception", taskLocation.exception)
-                    showSnackbar(R.string.no_location_detected)
+                    customSnackbar.showSnackbar(R.string.no_location_detected)
                 }
             }
     }
@@ -302,7 +256,8 @@ class HomeFragment : Fragment() {
      */
 
     private fun checkPermissions() =
-        ActivityCompat.checkSelfPermission(requireContext(),
+        ActivityCompat.checkSelfPermission(
+            requireContext(),
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PermissionChecker.PERMISSION_GRANTED
 
@@ -314,16 +269,18 @@ class HomeFragment : Fragment() {
     }
 
     private fun requestPermissions() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
                 Manifest.permission.ACCESS_COARSE_LOCATION
-            )) {
+            )
+        ) {
             // Proporciona una explicación adicional al usuario (rationale). Esto ocurre si el usuario
             // niega el permiso previamente pero no marca la casilla "No volver a preguntar".
             Log.i(
                 TAG,
                 "Muestra explicación rationale para proveer una contexto adicional de porque se requiere el permiso"
             )
-            showSnackbar(R.string.permission_rationale, android.R.string.ok) {
+            customSnackbar.showSnackbar(R.string.permission_rationale, android.R.string.ok) {
                 // Solicitar permiso
                 startLocationPermissionRequest()
             }
@@ -359,7 +316,7 @@ class HomeFragment : Fragment() {
 
 
                 else -> {
-                    showSnackbar(
+                    customSnackbar.showSnackbar(
                         R.string.permission_denied_explanation, R.string.settings
                     ) {
                         // Construye el intent que muestra la ventana de configuración del app.
@@ -375,25 +332,5 @@ class HomeFragment : Fragment() {
         }
     }
 
-    /**
-     * Muestra el [Snackbar].
-     *
-     * @param snackStrId El id del recurso para el el texto en el Snackbar.
-     * @param actionStrId El texto para el elemento de acción.
-     * @param listener El listener asociado con la acción del Snackbar.
-     */
-    private fun showSnackbar(
-        snackStrId: Int,
-        actionStrId: Int = 0,
-        listener: View.OnClickListener? = null
-    ) {
-        val snackbar = Snackbar.make(
-            requireActivity().findViewById(android.R.id.content), getString(snackStrId),
-            BaseTransientBottomBar.LENGTH_INDEFINITE
-        )
-        if (actionStrId != 0 && listener != null) {
-            snackbar.setAction(getString(actionStrId), listener)
-        }
-        snackbar.show()
-    }
+
 }

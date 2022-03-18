@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.network.service
+package mx.kodemia.personalweather.network.api
 
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
@@ -18,12 +18,12 @@ interface WeatherService {
         @Query("lon") lon: String,
         @Query("units") units: String?,
         @Query("lang") lang: String?,  // Para el idioma
-        @Query("appid") appid: String): WeatherEntity
+        @Query("appid") appid: String): Response<WeatherEntity>
 
     @GET("geo/1.0/reverse")
     suspend fun getCitiesByLatLon(
         @Query("lat") lat: String,
         @Query("lon") lon: String,
         @Query("appid") appid: String
-    ): List<City>
+    ): Response<List<City>>
 }
