@@ -60,7 +60,7 @@ class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -212,6 +212,7 @@ class HomeFragment : Fragment() {
             headlineCardView.isVisible = !visible
             detailsContainer.isVisible = !visible
             addressTextView.isVisible = !visible
+            recyclerDailyWeather.isVisible = !visible
         }
     }
 

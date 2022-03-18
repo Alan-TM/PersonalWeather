@@ -18,7 +18,9 @@ interface WeatherService {
         @Query("lon") lon: String,
         @Query("units") units: String?,
         @Query("lang") lang: String?,  // Para el idioma
-        @Query("appid") appid: String): Response<WeatherEntity>
+        @Query("appid") appid: String,
+        @Query("exclude") exclude: String = "minutely,hourly,alerts"
+    ): Response<WeatherEntity>
 
     @GET("geo/1.0/reverse")
     suspend fun getCitiesByLatLon(
