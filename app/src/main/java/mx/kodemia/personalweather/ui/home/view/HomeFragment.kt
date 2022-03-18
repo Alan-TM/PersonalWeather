@@ -15,19 +15,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import mx.kodemia.personalweather.BuildConfig.APPLICATION_ID
 import mx.kodemia.personalweather.R
+import mx.kodemia.personalweather.adapters.WeatherDailyAdapter
 import mx.kodemia.personalweather.databinding.FragmentHomeBinding
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
+import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
 import mx.kodemia.personalweather.utils.CustomSnackbar
 import mx.kodemia.personalweather.utils.checkForInternet
 import mx.kodemia.personalweather.utils.showIconHelper
@@ -138,10 +143,19 @@ class HomeFragment : Fragment() {
             formatWeatherResponse(weather)
         }
 
+        viewModel.weatherDaily.observe(viewLifecycleOwner, ::setupRecycler)
+
         viewModel.isLoading.observe(viewLifecycleOwner) {
             showLoadingIndicator(it)
             if (!it)
                 applyAnimations()
+        }
+    }
+
+    private fun setupRecycler(daily: List<WeatherDaily>) {
+        binding.recyclerDailyWeather.apply {
+            adapter = WeatherDailyAdapter(daily)
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         }
     }
 

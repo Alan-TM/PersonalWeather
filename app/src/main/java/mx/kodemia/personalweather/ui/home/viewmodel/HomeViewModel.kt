@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
+import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
 import mx.kodemia.personalweather.network.service.ServiceNetwork
 import java.lang.Exception
 
@@ -19,6 +20,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     val cityResponse = MutableLiveData<City>()
     val weatherResponse = MutableLiveData<WeatherEntity>()
     val error = MutableLiveData<String>()
+    val weatherDaily = MutableLiveData<List<WeatherDaily>>()
 
 
     fun getCityAndWeather(latitude: String, longitude: String, units: String, lang: String) {
@@ -49,12 +51,21 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
         if(weather.isSuccessful){
             weatherResponse.value = weather.body()
+            weatherDaily.value = weather.body()?.let { dailyWeather(it) }
             weather.body()?.daily?.forEach {
-                Log.e("WEATHER OBJECT", it.temp.toString())
+                Log.e("WEATHER_OBJECT", it.weather[0].icon)
             }
         } else {
             error.value = weather.message()
         }
+    }
+
+    private fun dailyWeather(weather: WeatherEntity): List<WeatherDaily>{
+        val dummyList = mutableListOf<WeatherDaily>()
+        for(i in 1 until weather.daily.size){
+            dummyList.add(weather.daily[i])
+        }
+        return dummyList
     }
 }
 

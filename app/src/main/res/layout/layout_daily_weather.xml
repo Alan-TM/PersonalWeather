@@ -7,6 +7,7 @@
     style="@style/Widget.Material3.CardView.Elevated"
     app:cardElevation="0dp"
     app:cardCornerRadius="5dp"
+    android:backgroundTint="@color/daily_bg"
     android:layout_marginHorizontal="8dp"
     >
 
@@ -22,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="@color/gray"
+            android:textColor="@color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Saturday" />
@@ -33,6 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:textColor="@color/white"
             app:layout_constraintStart_toStartOf="@+id/item_day_text_view"
             app:layout_constraintTop_toBottomOf="@id/item_day_text_view"
             tools:text="30ºc" />
@@ -45,6 +47,7 @@
             android:contentDescription="@null"
             app:layout_constraintBottom_toBottomOf="@+id/item_temperature_text_view"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/item_day_text_view"
             app:layout_constraintTop_toTopOf="@+id/item_day_text_view"
             app:srcCompat="@drawable/clear_day"
@@ -54,18 +57,22 @@
             android:id="@+id/item_humidity_image_view"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:contentDescription="@null"
             android:layout_marginVertical="4dp"
+            android:contentDescription="@null"
             app:layout_constraintEnd_toStartOf="@+id/item_humidity_text_view"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_weather_icon_image_view"
-            app:srcCompat="@drawable/humidity" />
+            app:srcCompat="@drawable/humidity"
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/item_humidity_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="4dp"
             app:layout_constraintBottom_toBottomOf="@id/item_humidity_image_view"
             app:layout_constraintEnd_toStartOf="@+id/item_wind_image_view"
             app:layout_constraintHorizontal_bias="0.5"
@@ -78,20 +85,25 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:contentDescription="@null"
+            android:layout_marginStart="4dp"
             app:layout_constraintBottom_toBottomOf="@id/item_humidity_image_view"
             app:layout_constraintEnd_toStartOf="@+id/item_wind_text_view"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/item_humidity_text_view"
             app:layout_constraintTop_toTopOf="@id/item_humidity_image_view"
-            app:srcCompat="@drawable/wind" />
+            app:srcCompat="@drawable/wind"
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/item_wind_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/item_wind_image_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
+            android:layout_marginHorizontal="4dp"
             app:layout_constraintStart_toEndOf="@+id/item_wind_image_view"
             app:layout_constraintTop_toTopOf="@id/item_wind_image_view"
             tools:text="4.5 km/h" />

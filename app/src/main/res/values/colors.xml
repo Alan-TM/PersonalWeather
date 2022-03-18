@@ -15,4 +15,5 @@
     <color name="temperature_highlight">#1A237E</color>
     <color name="gray">#706F6F</color>
     <color name="headline_card_view_bg">#5772FE</color>
+    <color name="daily_bg">#F3F4FD</color>
 </resources>
