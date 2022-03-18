@@ -1,6 +1,7 @@
 package mx.kodemia.personalweather.ui.home.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -48,6 +49,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
         if(weather.isSuccessful){
             weatherResponse.value = weather.body()
+            weather.body()?.daily?.forEach {
+                Log.e("WEATHER OBJECT", it.temp.toString())
+            }
         } else {
             error.value = weather.message()
         }

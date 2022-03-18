@@ -1,7 +1,10 @@
 package mx.kodemia.personalweather.model.weather
 
+import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
+
 data class WeatherEntity(
-    val current: Current
+    val current: Current,
+    val daily: List<WeatherDaily>
 )
 
 /*

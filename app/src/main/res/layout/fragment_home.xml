@@ -103,6 +103,7 @@
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/icon_image_view"
+                        tools:ignore="TextContrastCheck"
                         tools:text="Cielo despejado" />
 
                     <androidx.constraintlayout.widget.Guideline
@@ -150,6 +151,7 @@
                         app:layout_constraintEnd_toEndOf="@+id/temperature_text_view"
                         app:layout_constraintStart_toStartOf="@+id/temperature_text_view"
                         app:layout_constraintTop_toTopOf="@+id/status_text_view"
+                        tools:ignore="TextContrastCheck"
                         tools:text="Sensación: 22º" />
 
 
@@ -475,6 +477,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="invisible" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_daily_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailsContainer" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
