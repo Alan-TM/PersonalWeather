@@ -12,7 +12,7 @@ import java.lang.Exception
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val serviceNetwork = ServiceNetwork()
-    private val appid = "30ba6cd1ad33ea67e2dfd78a8d28ae62"
+    private val APPID = "30ba6cd1ad33ea67e2dfd78a8d28ae62"
 
     val isLoading = MutableLiveData<Boolean>()
     val cityResponse = MutableLiveData<City>()
@@ -34,7 +34,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private suspend fun getCityByLocation(latitude: String, longitude: String) {
-        val city = serviceNetwork.getCitiesByLatLon(latitude, longitude, appid)
+        val city = serviceNetwork.getCitiesByLatLon(latitude, longitude, APPID)
 
         if (city.isSuccessful) {
             cityResponse.value = city.body()!!.first()
@@ -44,7 +44,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private suspend fun getWeatherByLocation(latitude: String, longitude: String, units: String, lang: String) {
-        val weather = serviceNetwork.getWeatherByLatLon(latitude, longitude, units, lang, appid)
+        val weather = serviceNetwork.getWeatherByLatLon(latitude, longitude, units, lang, APPID)
 
         if(weather.isSuccessful){
             weatherResponse.value = weather.body()

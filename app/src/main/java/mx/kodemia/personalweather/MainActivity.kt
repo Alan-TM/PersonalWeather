@@ -21,11 +21,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
-        navController = navHostFragment.navController
-
-        setSupportActionBar(binding.mainToolbar)
-        setupActionBarWithNavController(navController)
+        navigationSetup()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -44,5 +40,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun navigationSetup(){
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
+        navController = navHostFragment.navController
+
+        setSupportActionBar(binding.mainToolbar)
+        setupActionBarWithNavController(navController)
     }
 }

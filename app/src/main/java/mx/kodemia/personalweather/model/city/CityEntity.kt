@@ -1,6 +1,6 @@
 package mx.kodemia.personalweather.model.city
 
-import mx.kodemia.personalweather.model.Current
+import mx.kodemia.personalweather.model.weather.Current
 
 data class CityEntity(
     val current: Current,

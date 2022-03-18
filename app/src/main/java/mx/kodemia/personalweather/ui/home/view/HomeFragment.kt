@@ -111,7 +111,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupViewData(location: Location) {
-        // Se coloca en este punto para permitir su ejecución
         showLoadingIndicator(true)
         latitude = location.latitude.toString()
         longitude = location.longitude.toString()
@@ -126,6 +125,7 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.getCityAndWeather(latitude, longitude, unit, languageCode)
+        Log.e("LOCATION", "$latitude, $longitude")
 
     }
 
