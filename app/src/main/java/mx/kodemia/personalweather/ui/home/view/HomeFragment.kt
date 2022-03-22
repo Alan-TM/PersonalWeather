@@ -10,18 +10,16 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -33,10 +31,10 @@ import mx.kodemia.personalweather.databinding.FragmentHomeBinding
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
 import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
+import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 import mx.kodemia.personalweather.utils.CustomSnackbar
 import mx.kodemia.personalweather.utils.checkForInternet
 import mx.kodemia.personalweather.utils.showIconHelper
-import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,9 +45,6 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var latitude = ""
-    private var longitude = ""
-
     private var units = false
     private var language = false
 
@@ -57,9 +52,6 @@ class HomeFragment : Fragment() {
 
     private lateinit var customSnackbar: CustomSnackbar
 
-    /**
-     * Punto de entrada para el API Fused Location Provider.
-     */
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(
@@ -79,6 +71,8 @@ class HomeFragment : Fragment() {
         permissionsSetup()
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+
+        //Pass this data to view model
         units = sharedPreferences.getBoolean("units", false)
         language = sharedPreferences.getBoolean("language", false)
 
@@ -101,6 +95,7 @@ class HomeFragment : Fragment() {
                 }
             }
         } else{
+            //Pass this error message to view model
             showMessage(getString(R.string.no_internet_access))
         }
     }
@@ -115,9 +110,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupViewData(location: Location) {
-        showLoadingIndicator(true)
-        latitude = location.latitude.toString()
-        longitude = location.longitude.toString()
+        viewModel.setLatitudeAndLongitude(location.latitude.toString(),
+            location.longitude.toString()
+        )
+
         var unit = "metric"
         var languageCode = "es"
 
@@ -128,8 +124,7 @@ class HomeFragment : Fragment() {
             languageCode = "en"
         }
 
-        viewModel.getCityAndWeather(latitude, longitude, unit, languageCode)
-        Log.e("LOCATION", "$latitude, $longitude")
+        viewModel.getCityAndWeather(unit, languageCode)
 
     }
 
@@ -158,14 +153,12 @@ class HomeFragment : Fragment() {
         }
     }
 
-    /**
-     * Función para mostrar los datos obtenidos de OpenWeather
-     */
-
+    //this should be in the view model
     private fun formatCityText(city: City) {
         binding.addressTextView.text = getString(R.string.city, city.name, city.country)
     }
 
+    //also this
     private fun formatWeatherResponse(weatherEntity: WeatherEntity) {
         val unitSymbol = if (units) "ºF" else "ºC"
 
@@ -253,11 +246,6 @@ class HomeFragment : Fragment() {
         fusedLocationClient.lastLocation
             .addOnCompleteListener { taskLocation ->
                 if (taskLocation.isSuccessful && taskLocation.result != null) {
-
-                    val location = taskLocation.result
-
-                    latitude = location?.latitude.toString()
-                    longitude = location?.longitude.toString()
                     onLocation(taskLocation.result)
                 } else {
                     Log.w(TAG, "getLastLocation:exception", taskLocation.exception)
