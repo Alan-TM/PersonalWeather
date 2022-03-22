@@ -22,13 +22,17 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     val error = MutableLiveData<String>()
     val weatherDaily = MutableLiveData<List<WeatherDaily>>()
 
+    private val location = MutableLiveData<HashMap<String, String>>()
 
-    fun getCityAndWeather(latitude: String, longitude: String, units: String, lang: String) {
+
+    fun getCityAndWeather(units: String, lang: String) {
         isLoading.value = true
         viewModelScope.launch {
             try {
-                getCityByLocation(latitude, longitude)
-                getWeatherByLocation(latitude, longitude, units, lang)
+                location.value?.let{ loc ->
+                    getCityByLocation(loc["lat"]!!, loc["lon"]!!)
+                    getWeatherByLocation(loc["lat"]!!, loc["lon"]!!, units, lang)
+                }
             } catch(e: Exception){
                 error.value = e.message
             }
@@ -52,9 +56,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         if(weather.isSuccessful){
             weatherResponse.value = weather.body()
             weatherDaily.value = weather.body()?.let { dailyWeather(it) }
-            weather.body()?.daily?.forEach {
-                Log.e("WEATHER_OBJECT", it.weather[0].icon)
-            }
         } else {
             error.value = weather.message()
         }
@@ -66,6 +67,10 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             dummyList.add(weather.daily[i])
         }
         return dummyList
+    }
+
+    fun setLatitudeAndLongitude(latitude: String, longitude: String){
+        location.value = hashMapOf(Pair("lat", latitude), Pair("lon", longitude))
     }
 }
 
