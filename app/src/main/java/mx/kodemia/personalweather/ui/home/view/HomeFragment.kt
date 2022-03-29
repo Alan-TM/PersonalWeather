@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package mx.kodemia.personalweather.ui.home.view
 
 import android.Manifest
@@ -9,7 +11,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,18 +30,12 @@ import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.adapters.WeatherDailyAdapter
 import mx.kodemia.personalweather.core.Constants.REQUEST_PERMISSIONS_REQUEST_CODE
 import mx.kodemia.personalweather.databinding.FragmentHomeBinding
-import mx.kodemia.personalweather.model.city.City
-import mx.kodemia.personalweather.model.weather.WeatherEntity
-import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
 import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 import mx.kodemia.personalweather.utils.CustomSnackbar
 import mx.kodemia.personalweather.utils.checkForInternet
 import mx.kodemia.personalweather.utils.showIconHelper
-import java.text.SimpleDateFormat
-import java.util.*
 
-private const val TAG = "MainActivityError"
-
+@Suppress("DEPRECATION")
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
@@ -72,8 +67,6 @@ class HomeFragment : Fragment() {
         permissionsSetup()
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-
-        //Pass this data to view model
         sharedPrefUnits = sharedPreferences.getBoolean("units", false)
         sharedPrefLanguage = sharedPreferences.getBoolean("language", false)
 
@@ -96,7 +89,6 @@ class HomeFragment : Fragment() {
                 }
             }
         } else{
-            //Pass this error message to view model
             showMessage(getString(R.string.no_internet_access))
         }
     }
@@ -117,7 +109,6 @@ class HomeFragment : Fragment() {
             sharedPrefLanguage
         )
         viewModel.getCityAndWeather()
-
     }
 
     private fun apiResponseObservers() {
@@ -140,7 +131,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setupRecycler(daily: List<WeatherDaily>) {
+    private fun setupRecycler(daily: ArrayList<HashMap<String, String>>) {
         binding.recyclerDailyWeather.apply {
             adapter = WeatherDailyAdapter(daily)
             layoutManager = LinearLayoutManager(requireContext())
@@ -244,9 +235,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    /**
-     * Callback recibido cuando se ha completado una solicitud de permiso.
-     */
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -257,7 +246,7 @@ class HomeFragment : Fragment() {
             when {
                 // Si el flujo es interrumpido, la solicitud de permiso es cancelada y se
                 // reciben arrays vacios.
-                grantResults.isEmpty() -> Log.i(TAG, "La interacción del usuario fue cancelada.")
+                grantResults.isEmpty() -> showMessage(getString(R.string.canceled_action))
 
                 // Permiso otorgado.
                 // Podemos pasar la referencia a una funcion si cumple con el mismo prototipo

@@ -5,22 +5,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import mx.kodemia.personalweather.databinding.LayoutWeatherDailyBinding
-import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
 import mx.kodemia.personalweather.utils.showIconHelper
-import java.text.SimpleDateFormat
-import java.util.*
 
-class WeatherDailyAdapter(private val items: List<WeatherDaily>) :
+class WeatherDailyAdapter(private val items: ArrayList<HashMap<String, String>>) :
     RecyclerView.Adapter<WeatherDailyAdapter.DailyViewHolder>() {
     class DailyViewHolder(private val binding: LayoutWeatherDailyBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun setInfo(item: WeatherDaily) {
+        fun setInfo(item: HashMap<String, String>) {
             with(binding) {
-                itemDayText.text = SimpleDateFormat("EEEE", Locale.ENGLISH).format(Date(item.dt * 1000))
-                itemTemperature.text = item.temp.day.toInt().toString() + "º"
-                itemStatus.load(showIconHelper(item.weather[0].icon))
-                itemHumidityValue.text = "${item.humidity}%"
-                itemWindValue.text = "${item.wind_speed} km/h"
+                itemDayText.text = item["day"]
+                itemTemperature.text = item["temperature"]!!
+                itemStatus.load(showIconHelper(item["icon"]!!))
+                itemHumidityValue.text = item["humidity"]
+                itemWindValue.text = item["wind"]
             }
 
         }
