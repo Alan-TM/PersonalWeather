@@ -35,5 +35,14 @@
             motion:layout_constraintTop_toBottomOf="@id/common_details"
             android:alpha="1"
             motion:layout_constraintStart_toStartOf="parent" />
+        <Constraint
+            android:id="@+id/details_arrow"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintTop_toBottomOf="@id/other_details"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:rotationX="180" />
     </ConstraintSet>
 </MotionScene>
