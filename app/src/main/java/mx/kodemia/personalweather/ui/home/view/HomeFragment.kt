@@ -142,7 +142,7 @@ class HomeFragment : Fragment() {
     private fun setupRecycler(daily: List<WeatherDaily>) {
         binding.recyclerDailyWeather.apply {
             adapter = WeatherDailyAdapter(daily)
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            layoutManager = LinearLayoutManager(requireContext())
         }
     }
 
