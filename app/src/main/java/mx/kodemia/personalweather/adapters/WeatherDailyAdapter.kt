@@ -4,16 +4,15 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import mx.kodemia.personalweather.databinding.LayoutDailyWeatherBinding
 import mx.kodemia.personalweather.databinding.LayoutWeatherDailyBinding
 import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
 import mx.kodemia.personalweather.utils.showIconHelper
 import java.text.SimpleDateFormat
 import java.util.*
 
-class WeatherDailyAdapter(val items: List<WeatherDaily>) :
+class WeatherDailyAdapter(private val items: List<WeatherDaily>) :
     RecyclerView.Adapter<WeatherDailyAdapter.DailyViewHolder>() {
-    class DailyViewHolder(val binding: LayoutWeatherDailyBinding) :
+    class DailyViewHolder(private val binding: LayoutWeatherDailyBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun setInfo(item: WeatherDaily) {
             with(binding) {
