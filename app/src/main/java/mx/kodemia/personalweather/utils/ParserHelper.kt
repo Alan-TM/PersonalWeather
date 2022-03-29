@@ -10,3 +10,5 @@ fun capitalizeText(text: String): String {
         text.uppercase()
     else ""
 }
+
+fun dayParser(day: Long): String = SimpleDateFormat("EEEE", Locale.ENGLISH).format(Date(day * 1000))

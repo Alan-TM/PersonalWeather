@@ -8,33 +8,26 @@ import kotlinx.coroutines.launch
 import mx.kodemia.personalweather.core.Constants.API_KEY
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
-import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
 import mx.kodemia.personalweather.network.service.ServiceNetwork
 import mx.kodemia.personalweather.utils.capitalizeText
+import mx.kodemia.personalweather.utils.dayParser
 import mx.kodemia.personalweather.utils.hourParser
-import java.lang.Exception
-import kotlin.collections.HashMap
 
-class HomeViewModel() : ViewModel() {
-    private val serviceNetwork = ServiceNetwork()
-
+class HomeViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
     private val _cityResponse = MutableLiveData<City>()
     val cityResponse: LiveData<City> = _cityResponse
-    private val _weatherResponse = MutableLiveData<WeatherEntity>()
-    val weatherResponse: LiveData<WeatherEntity> = _weatherResponse
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
-    private val _weatherDaily = MutableLiveData<List<WeatherDaily>>()
-    val weatherDaily: LiveData<List<WeatherDaily>> = _weatherDaily
+    private val _weatherDaily = MutableLiveData<ArrayList<HashMap<String, String>>>()
+    val weatherDaily: LiveData<ArrayList<HashMap<String, String>>> = _weatherDaily
     private val _unitSymbol = MutableLiveData<String>()
-
     private val _dataForView = MutableLiveData<HashMap<String, String>>()
     val dataForView: LiveData<HashMap<String, String>> = _dataForView
 
+    private val serviceNetwork = ServiceNetwork()
     private lateinit var preferencesCall: HashMap<String, String>
-
 
     fun getCityAndWeather() {
         _isLoading.value = true
@@ -70,19 +63,25 @@ class HomeViewModel() : ViewModel() {
         val weather = serviceNetwork.getWeatherByLatLon(latitude, longitude, units, lang, API_KEY)
 
         if (weather.isSuccessful) {
-            _weatherResponse.value = weather.body()
-            _weatherDaily.value = weather.body()?.let { dailyWeather(it) }
-
             weather.body()?.let { setDataForView(it) }
+            _weatherDaily.value = weather.body()?.let { dailyWeather(it) }
         } else {
             _error.value = weather.message()
         }
     }
 
-    private fun dailyWeather(weather: WeatherEntity): List<WeatherDaily> {
-        val dummyList = mutableListOf<WeatherDaily>()
+    private fun dailyWeather(weather: WeatherEntity): ArrayList<HashMap<String, String>> {
+        val dummyList = ArrayList<HashMap<String, String>>()
         for (i in 1 until weather.daily.size) {
-            dummyList.add(weather.daily[i])
+            dummyList.add(
+                hashMapOf(
+                    Pair("temperature", "${weather.daily[i].temp.day.toInt()} ${_unitSymbol.value}"),
+                    Pair("day", dayParser(weather.daily[i].dt)),
+                    Pair("icon", weather.daily[i].weather[0].icon),
+                    Pair("humidity", "${weather.daily[i].humidity} %"),
+                    Pair("wind", "${weather.daily[i].wind_speed} km/h")
+                )
+            )
         }
         return dummyList
     }
