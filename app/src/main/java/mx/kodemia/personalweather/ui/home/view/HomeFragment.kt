@@ -115,30 +115,27 @@ class HomeFragment : Fragment() {
             sharedPrefUnits,
             sharedPrefLanguage
         )
-
         viewModel.getCityAndWeather()
 
     }
 
     private fun apiResponseObservers() {
-        viewModel.cityResponse.observe(viewLifecycleOwner) { city ->
-            formatCityText(city)
-        }
+        with(viewModel) {
+            cityResponse.observe(viewLifecycleOwner) { city ->
+                binding.addressTextView.text = getString(R.string.city, city.name, city.country)
+            }
 
-        viewModel.weatherResponse.observe(viewLifecycleOwner) { weather ->
-            formatWeatherResponse(weather)
-        }
+            dataForView.observe(viewLifecycleOwner, ::setWeatherInfo)
 
-        viewModel.weatherDaily.observe(viewLifecycleOwner, ::setupRecycler)
+            weatherDaily.observe(viewLifecycleOwner, ::setupRecycler)
 
-        viewModel.isLoading.observe(viewLifecycleOwner) {
-            showLoadingIndicator(it)
-            if (!it)
-                applyAnimations()
-        }
+            isLoading.observe(viewLifecycleOwner) {
+                showLoadingIndicator(it)
+                if (!it)
+                    applyAnimations()
+            }
 
-        viewModel.error.observe(viewLifecycleOwner){
-            showMessage(it)
+            error.observe(viewLifecycleOwner, ::showMessage)
         }
     }
 
@@ -149,59 +146,18 @@ class HomeFragment : Fragment() {
         }
     }
 
-    //this should be in the view model
-    private fun formatCityText(city: City) {
-        binding.addressTextView.text = getString(R.string.city, city.name, city.country)
-    }
-
-    //also this
-    private fun formatWeatherResponse(weatherEntity: WeatherEntity) {
-        val unitSymbol = if (sharedPrefUnits) "ºF" else "ºC"
-
-        try {
-            val temp = "${weatherEntity.current.temp.toInt()} $unitSymbol"
-            val dt = weatherEntity.current.dt
-            val updateAt = getString(
-                R.string.updatedAt,
-                SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(dt * 1000))
-            )
-            val tempMin = "" //"Mín: ${weatherEntity.main.temp_min.toInt()}º"
-            val tempMax = "" //""Max: ${weatherEntity.main.temp_max.toInt()}º"
-            // Capitalizar la primera letra de la descripción
-            var status = ""
-            val weatherDescription = weatherEntity.current.weather[0].description
-            if (weatherDescription.isNotEmpty()) {
-                status = (weatherDescription[0].uppercaseChar() + weatherDescription.substring(1))
-            }
-            val sunrise = weatherEntity.current.sunrise
-            val sunriseFormat =
-                SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunrise * 1000))
-            val sunset = weatherEntity.current.sunset
-            val sunsetFormat =
-                SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunset * 1000))
-            val wind = "${weatherEntity.current.wind_speed} km/h"
-            val pressure = "${weatherEntity.current.pressure} mb"
-            val humidity = "${weatherEntity.current.humidity}%"
-            val feelsLike =
-                getString(R.string.sensation) + weatherEntity.current.feels_like.toInt() + unitSymbol
-            val icon = weatherEntity.current.weather[0].icon
-
-            binding.apply {
-                iconImageView.load(showIconHelper(icon))
-                dateTextView.text = updateAt
-                temperatureTextView.text = temp
-                statusTextView.text = status
-                tempMinTextView.text = tempMin
-                tempMaxTextView.text = tempMax
-                sunriseTextView.text = sunriseFormat
-                sunsetTextView.text = sunsetFormat
-                windTextView.text = wind
-                pressureTextView.text = pressure
-                humidityTextView.text = humidity
-                feelsLikeTextView.text = feelsLike
-            }
-        } catch (exception: Exception) {
-            showMessage(getString(R.string.error_ocurred))
+    private fun setWeatherInfo(data: HashMap<String, String>){
+        with(binding) {
+            iconImageView.load(showIconHelper(data["icon"]!!))
+            dateTextView.text = data["updatedAt"]
+            temperatureTextView.text = data["temperature"]
+            statusTextView.text = data["status"]
+            sunriseTextView.text = data["sunrise"]
+            sunsetTextView.text = data["sunset"]
+            windTextView.text = getString(R.string.wind_value, data["wind"])
+            pressureTextView.text = getString(R.string.pressure_value, data["pressure"])
+            humidityTextView.text = data["humidity"]
+            feelsLikeTextView.text = getString(R.string.sensation, data["feelsLike"])
         }
     }
 
