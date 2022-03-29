@@ -9,7 +9,7 @@
         motion:duration="250">
        <KeyFrameSet>
        </KeyFrameSet>
-        <OnClick motion:targetId="@id/common_details"
+        <OnClick motion:targetId="@id/details_arrow"
             motion:clickAction="toggle" />
     </Transition>
 
