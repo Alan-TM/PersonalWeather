@@ -5,8 +5,8 @@ import java.util.*
 
 fun hourParser(time: Long): String = SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(time * 1000))
 
-fun capitalizeFirstLetterText(text: String): String {
+fun capitalizeText(text: String): String {
     return if (text.isNotEmpty())
-        (text.uppercase() + text.substring(1))
+        text.uppercase()
     else ""
 }
