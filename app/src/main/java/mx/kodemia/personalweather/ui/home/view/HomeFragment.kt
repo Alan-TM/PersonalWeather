@@ -27,6 +27,7 @@ import com.google.android.gms.location.LocationServices
 import mx.kodemia.personalweather.BuildConfig.APPLICATION_ID
 import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.adapters.WeatherDailyAdapter
+import mx.kodemia.personalweather.core.Constants.REQUEST_PERMISSIONS_REQUEST_CODE
 import mx.kodemia.personalweather.databinding.FragmentHomeBinding
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
@@ -39,14 +40,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 private const val TAG = "MainActivityError"
-private const val REQUEST_PERMISSIONS_REQUEST_CODE = 34
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var units = false
-    private var language = false
+    private var sharedPrefUnits = false
+    private var sharedPrefLanguage = false
 
     private val viewModel: HomeViewModel by viewModels()
 
@@ -73,8 +73,8 @@ class HomeFragment : Fragment() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
         //Pass this data to view model
-        units = sharedPreferences.getBoolean("units", false)
-        language = sharedPreferences.getBoolean("language", false)
+        sharedPrefUnits = sharedPreferences.getBoolean("units", false)
+        sharedPrefLanguage = sharedPreferences.getBoolean("language", false)
 
         onRefreshAPICall()
         apiResponseObservers()
@@ -90,7 +90,7 @@ class HomeFragment : Fragment() {
             if (!checkPermissions()) {
                 requestPermissions()
             } else {
-                getLastLocation() { location ->
+                getLastLocation { location ->
                     setupViewData(location)
                 }
             }
@@ -110,21 +110,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupViewData(location: Location) {
-        viewModel.setLatitudeAndLongitude(location.latitude.toString(),
-            location.longitude.toString()
+        viewModel.setDataForAPICall(location.latitude.toString(),
+            location.longitude.toString(),
+            sharedPrefUnits,
+            sharedPrefLanguage
         )
 
-        var unit = "metric"
-        var languageCode = "es"
-
-        if (units) {
-            unit = "imperial"
-        }
-        if (language) {
-            languageCode = "en"
-        }
-
-        viewModel.getCityAndWeather(unit, languageCode)
+        viewModel.getCityAndWeather()
 
     }
 
@@ -144,6 +136,10 @@ class HomeFragment : Fragment() {
             if (!it)
                 applyAnimations()
         }
+
+        viewModel.error.observe(viewLifecycleOwner){
+            showMessage(it)
+        }
     }
 
     private fun setupRecycler(daily: List<WeatherDaily>) {
@@ -160,7 +156,7 @@ class HomeFragment : Fragment() {
 
     //also this
     private fun formatWeatherResponse(weatherEntity: WeatherEntity) {
-        val unitSymbol = if (units) "ºF" else "ºC"
+        val unitSymbol = if (sharedPrefUnits) "ºF" else "ºC"
 
         try {
             val temp = "${weatherEntity.current.temp.toInt()} $unitSymbol"
@@ -248,7 +244,6 @@ class HomeFragment : Fragment() {
                 if (taskLocation.isSuccessful && taskLocation.result != null) {
                     onLocation(taskLocation.result)
                 } else {
-                    Log.w(TAG, "getLastLocation:exception", taskLocation.exception)
                     customSnackbar.showSnackbar(R.string.no_location_detected)
                 }
             }
@@ -279,10 +274,6 @@ class HomeFragment : Fragment() {
         ) {
             // Proporciona una explicación adicional al usuario (rationale). Esto ocurre si el usuario
             // niega el permiso previamente pero no marca la casilla "No volver a preguntar".
-            Log.i(
-                TAG,
-                "Muestra explicación rationale para proveer una contexto adicional de porque se requiere el permiso"
-            )
             customSnackbar.showSnackbar(R.string.permission_rationale, android.R.string.ok) {
                 // Solicitar permiso
                 startLocationPermissionRequest()
@@ -292,7 +283,6 @@ class HomeFragment : Fragment() {
             // Solicitar permiso. Es posible que esto pueda ser contestado de forma automática
             // si la configuración del dispositivo define el permiso a un estado predefinido o
             // si el usuario anteriormente activo "No presenter de nuevo".
-            Log.i(TAG, "Solicitando permiso")
             startLocationPermissionRequest()
         }
     }
@@ -306,7 +296,6 @@ class HomeFragment : Fragment() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        Log.i(TAG, "onRequestPermissionResult")
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             when {
                 // Si el flujo es interrumpido, la solicitud de permiso es cancelada y se
