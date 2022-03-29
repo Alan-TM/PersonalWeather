@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather
+package mx.kodemia.personalweather.ui.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,6 +8,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
+import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
