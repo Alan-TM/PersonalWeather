@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.model.weather
+package mx.kodemia.personalweather.data.model.weather
 
 data class Sys(
     val country: String,

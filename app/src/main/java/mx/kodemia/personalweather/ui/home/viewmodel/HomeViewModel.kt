@@ -10,8 +10,8 @@ import mx.kodemia.personalweather.core.utils.dayParser
 import mx.kodemia.personalweather.core.utils.hourParser
 import mx.kodemia.personalweather.domain.GetCityUseCase
 import mx.kodemia.personalweather.domain.GetWeatherUseCase
-import mx.kodemia.personalweather.model.city.City
-import mx.kodemia.personalweather.model.weather.WeatherEntity
+import mx.kodemia.personalweather.data.model.city.City
+import mx.kodemia.personalweather.data.model.weather.WeatherEntity
 
 class HomeViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()

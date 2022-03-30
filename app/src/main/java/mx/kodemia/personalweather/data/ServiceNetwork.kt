@@ -1,12 +1,12 @@
-package mx.kodemia.personalweather.network.service
+package mx.kodemia.personalweather.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mx.kodemia.personalweather.core.Constants.API_KEY
-import mx.kodemia.personalweather.model.city.City
-import mx.kodemia.personalweather.model.weather.WeatherEntity
+import mx.kodemia.personalweather.data.model.city.City
+import mx.kodemia.personalweather.data.model.weather.WeatherEntity
 import mx.kodemia.personalweather.core.RetrofitInstance
-import mx.kodemia.personalweather.network.api.WeatherService
+import mx.kodemia.personalweather.data.network.api.WeatherService
 import retrofit2.Response
 
 class ServiceNetwork {

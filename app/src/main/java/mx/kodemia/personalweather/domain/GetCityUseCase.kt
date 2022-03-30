@@ -1,6 +1,6 @@
 package mx.kodemia.personalweather.domain
 
-import mx.kodemia.personalweather.network.service.ServiceNetwork
+import mx.kodemia.personalweather.data.ServiceNetwork
 
 class GetCityUseCase {
 

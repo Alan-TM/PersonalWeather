@@ -1,6 +1,4 @@
-package mx.kodemia.personalweather.model.weather
-
-import mx.kodemia.personalweather.model.weather.Weather
+package mx.kodemia.personalweather.data.model.weather
 
 data class Current(
     val dt: Long,
