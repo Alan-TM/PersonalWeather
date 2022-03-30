@@ -5,16 +5,15 @@ import kotlinx.coroutines.withContext
 import mx.kodemia.personalweather.core.Constants.API_KEY
 import mx.kodemia.personalweather.data.model.city.City
 import mx.kodemia.personalweather.data.model.weather.WeatherEntity
-import mx.kodemia.personalweather.core.RetrofitInstance
 import mx.kodemia.personalweather.data.network.api.WeatherService
 import retrofit2.Response
+import javax.inject.Inject
 
-class ServiceNetwork {
-    private val retrofit = RetrofitInstance.getInstance().create(WeatherService::class.java)
+class ServiceNetwork @Inject constructor(private val api: WeatherService) {
 
     suspend fun getCitiesByLatLon(latitude: String, longitude: String): Response<List<City>> =
         withContext(Dispatchers.IO) {
-            retrofit.getCitiesByLatLon(latitude, longitude, API_KEY)
+            api.getCitiesByLatLon(latitude, longitude, API_KEY)
         }
 
     suspend fun getWeatherByLatLon(
@@ -24,6 +23,6 @@ class ServiceNetwork {
         lang: String
     ): Response<WeatherEntity> =
         withContext(Dispatchers.IO) {
-            retrofit.getWeatherById(latitude, longitude, units, lang, API_KEY)
+            api.getWeatherById(latitude, longitude, units, lang, API_KEY)
         }
 }
