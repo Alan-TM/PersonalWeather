@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import mx.kodemia.personalweather.core.utils.capitalizeText
 import mx.kodemia.personalweather.core.utils.dayParser
@@ -12,8 +13,14 @@ import mx.kodemia.personalweather.domain.GetCityUseCase
 import mx.kodemia.personalweather.domain.GetWeatherUseCase
 import mx.kodemia.personalweather.data.model.city.City
 import mx.kodemia.personalweather.data.model.weather.WeatherEntity
+import javax.inject.Inject
 
-class HomeViewModel : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val getCityUseCase: GetCityUseCase,
+    private val getWeatherUseCase: GetWeatherUseCase
+) : ViewModel() {
+
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
     private val _cityResponse = MutableLiveData<City>()
@@ -23,11 +30,9 @@ class HomeViewModel : ViewModel() {
     private val _weatherDaily = MutableLiveData<ArrayList<HashMap<String, String>>>()
     val weatherDaily: LiveData<ArrayList<HashMap<String, String>>> = _weatherDaily
     private val _unitSymbol = MutableLiveData<String>()
-    private val _dataForView = MutableLiveData<HashMap<String, String>>()
-    val dataForView: LiveData<HashMap<String, String>> = _dataForView
+    private val _weatherDataForView = MutableLiveData<HashMap<String, String>>()
+    val weatherDataForView: LiveData<HashMap<String, String>> = _weatherDataForView
 
-    private val getCityUseCase = GetCityUseCase()
-    private val getWeatherUseCase = GetWeatherUseCase()
     private lateinit var preferencesCall: HashMap<String, String>
 
     fun getCityAndWeather() {
@@ -126,7 +131,7 @@ class HomeViewModel : ViewModel() {
         val feelsLike = "${weather.current.feels_like.toInt()} ${_unitSymbol.value}"
         val icon = weather.current.weather[0].icon
 
-        _dataForView.value = hashMapOf(
+        _weatherDataForView.value = hashMapOf(
             Pair("temperature", temp),
             Pair("updatedAt", updatedAt),
             Pair("status", status),

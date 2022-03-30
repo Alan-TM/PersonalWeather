@@ -1,9 +1,9 @@
 package mx.kodemia.personalweather.domain
 
 import mx.kodemia.personalweather.data.ServiceNetwork
+import javax.inject.Inject
 
-class GetWeatherUseCase {
-    private val repository = ServiceNetwork()
+class GetWeatherUseCase @Inject constructor(private val repository: ServiceNetwork) {
 
     suspend operator fun invoke(
         latitude: String,

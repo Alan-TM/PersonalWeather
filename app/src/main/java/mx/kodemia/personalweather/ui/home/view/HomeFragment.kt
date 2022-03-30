@@ -25,17 +25,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
 import mx.kodemia.personalweather.BuildConfig.APPLICATION_ID
 import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.adapters.WeatherDailyAdapter
 import mx.kodemia.personalweather.core.Constants.REQUEST_PERMISSIONS_REQUEST_CODE
-import mx.kodemia.personalweather.databinding.FragmentHomeBinding
-import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 import mx.kodemia.personalweather.core.utils.CustomSnackbar
 import mx.kodemia.personalweather.core.utils.checkForInternet
 import mx.kodemia.personalweather.core.utils.showIconHelper
+import mx.kodemia.personalweather.databinding.FragmentHomeBinding
+import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 
 @Suppress("DEPRECATION")
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -117,7 +119,7 @@ class HomeFragment : Fragment() {
                 binding.addressTextView.text = getString(R.string.city, city.name, city.country)
             }
 
-            dataForView.observe(viewLifecycleOwner, ::setWeatherInfo)
+            weatherDataForView.observe(viewLifecycleOwner, ::setWeatherInfo)
 
             weatherDaily.observe(viewLifecycleOwner, ::setupRecycler)
 
