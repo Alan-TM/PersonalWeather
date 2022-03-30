@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.utils
+package mx.kodemia.personalweather.core.utils
 
 import java.text.SimpleDateFormat
 import java.util.*

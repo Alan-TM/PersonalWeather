@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.utils
+package mx.kodemia.personalweather.core.utils
 
 sealed class LoadingState{
     data class Loading(val loading: Boolean = true)

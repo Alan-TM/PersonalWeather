@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.network.api
+package mx.kodemia.personalweather.core
 
 import android.icu.util.TimeUnit
 import android.util.Log

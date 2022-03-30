@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.utils
+package mx.kodemia.personalweather.core.utils
 
 import mx.kodemia.personalweather.R
 

@@ -5,13 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import mx.kodemia.personalweather.core.Constants.API_KEY
+import mx.kodemia.personalweather.core.utils.capitalizeText
+import mx.kodemia.personalweather.core.utils.dayParser
+import mx.kodemia.personalweather.core.utils.hourParser
+import mx.kodemia.personalweather.domain.GetCityUseCase
+import mx.kodemia.personalweather.domain.GetWeatherUseCase
 import mx.kodemia.personalweather.model.city.City
 import mx.kodemia.personalweather.model.weather.WeatherEntity
-import mx.kodemia.personalweather.network.service.ServiceNetwork
-import mx.kodemia.personalweather.utils.capitalizeText
-import mx.kodemia.personalweather.utils.dayParser
-import mx.kodemia.personalweather.utils.hourParser
 
 class HomeViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
@@ -26,7 +26,8 @@ class HomeViewModel : ViewModel() {
     private val _dataForView = MutableLiveData<HashMap<String, String>>()
     val dataForView: LiveData<HashMap<String, String>> = _dataForView
 
-    private val serviceNetwork = ServiceNetwork()
+    private val getCityUseCase = GetCityUseCase()
+    private val getWeatherUseCase = GetWeatherUseCase()
     private lateinit var preferencesCall: HashMap<String, String>
 
     fun getCityAndWeather() {
@@ -45,7 +46,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private suspend fun getCityByLocation(latitude: String, longitude: String) {
-        val city = serviceNetwork.getCitiesByLatLon(latitude, longitude, API_KEY)
+        val city = getCityUseCase(latitude, longitude)
 
         if (city.isSuccessful) {
             _cityResponse.value = city.body()!!.first()
@@ -60,11 +61,13 @@ class HomeViewModel : ViewModel() {
         units: String,
         lang: String
     ) {
-        val weather = serviceNetwork.getWeatherByLatLon(latitude, longitude, units, lang, API_KEY)
+        val weather = getWeatherUseCase(latitude, longitude, units, lang)
 
         if (weather.isSuccessful) {
-            weather.body()?.let { setDataForView(it) }
-            _weatherDaily.value = weather.body()?.let { dailyWeather(it) }
+            weather.body()?.let {
+                setDataForView(it)
+                _weatherDaily.value = dailyWeather(it)
+            }
         } else {
             _error.value = weather.message()
         }
@@ -75,7 +78,10 @@ class HomeViewModel : ViewModel() {
         for (i in 1 until weather.daily.size) {
             dummyList.add(
                 hashMapOf(
-                    Pair("temperature", "${weather.daily[i].temp.day.toInt()} ${_unitSymbol.value}"),
+                    Pair(
+                        "temperature",
+                        "${weather.daily[i].temp.day.toInt()} ${_unitSymbol.value}"
+                    ),
                     Pair("day", dayParser(weather.daily[i].dt)),
                     Pair("icon", weather.daily[i].weather[0].icon),
                     Pair("humidity", "${weather.daily[i].humidity} %"),

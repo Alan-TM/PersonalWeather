@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import mx.kodemia.personalweather.databinding.LayoutWeatherDailyBinding
-import mx.kodemia.personalweather.utils.showIconHelper
+import mx.kodemia.personalweather.core.utils.showIconHelper
 
 class WeatherDailyAdapter(private val items: ArrayList<HashMap<String, String>>) :
     RecyclerView.Adapter<WeatherDailyAdapter.DailyViewHolder>() {
