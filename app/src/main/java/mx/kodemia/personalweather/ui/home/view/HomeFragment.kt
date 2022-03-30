@@ -31,9 +31,9 @@ import mx.kodemia.personalweather.adapters.WeatherDailyAdapter
 import mx.kodemia.personalweather.core.Constants.REQUEST_PERMISSIONS_REQUEST_CODE
 import mx.kodemia.personalweather.databinding.FragmentHomeBinding
 import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
-import mx.kodemia.personalweather.utils.CustomSnackbar
-import mx.kodemia.personalweather.utils.checkForInternet
-import mx.kodemia.personalweather.utils.showIconHelper
+import mx.kodemia.personalweather.core.utils.CustomSnackbar
+import mx.kodemia.personalweather.core.utils.checkForInternet
+import mx.kodemia.personalweather.core.utils.showIconHelper
 
 @Suppress("DEPRECATION")
 class HomeFragment : Fragment() {
@@ -79,7 +79,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun permissionsSetup() {
-        if(checkForInternet(requireContext())) {
+        if (checkForInternet(requireContext())) {
             if (!checkPermissions()) {
                 requestPermissions()
             } else {
@@ -87,7 +87,7 @@ class HomeFragment : Fragment() {
                     setupViewData(location)
                 }
             }
-        } else{
+        } else {
             showMessage(getString(R.string.no_internet_access))
         }
     }
@@ -102,7 +102,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupViewData(location: Location) {
-        viewModel.setDataForAPICall(location.latitude.toString(),
+        viewModel.setDataForAPICall(
+            location.latitude.toString(),
             location.longitude.toString(),
             sharedPrefUnits,
             sharedPrefLanguage
@@ -137,7 +138,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setWeatherInfo(data: HashMap<String, String>){
+    private fun setWeatherInfo(data: HashMap<String, String>) {
         with(binding) {
             iconImageView.load(showIconHelper(data["icon"]!!))
             dateTextView.text = data["updatedAt"]
@@ -157,7 +158,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun showLoadingIndicator(visible: Boolean) {
-        with(binding){
+        with(binding) {
             progressBarIndicator.isVisible = visible
             headlineCardView.isVisible = !visible
             detailsContainer.isVisible = !visible
@@ -196,10 +197,6 @@ class HomeFragment : Fragment() {
             }
     }
 
-    /**
-     * Devuelve el estado de los permisos que se necesitan
-     */
-
     private fun checkPermissions() =
         ActivityCompat.checkSelfPermission(
             requireContext(),
@@ -219,21 +216,13 @@ class HomeFragment : Fragment() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         ) {
-            // Proporciona una explicación adicional al usuario (rationale). Esto ocurre si el usuario
-            // niega el permiso previamente pero no marca la casilla "No volver a preguntar".
             customSnackbar.showSnackbar(R.string.permission_rationale, android.R.string.ok) {
-                // Solicitar permiso
                 startLocationPermissionRequest()
             }
-
         } else {
-            // Solicitar permiso. Es posible que esto pueda ser contestado de forma automática
-            // si la configuración del dispositivo define el permiso a un estado predefinido o
-            // si el usuario anteriormente activo "No presenter de nuevo".
             startLocationPermissionRequest()
         }
     }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -243,20 +232,12 @@ class HomeFragment : Fragment() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             when {
-                // Si el flujo es interrumpido, la solicitud de permiso es cancelada y se
-                // reciben arrays vacios.
                 grantResults.isEmpty() -> showMessage(getString(R.string.canceled_action))
-
-                // Permiso otorgado.
-                // Podemos pasar la referencia a una funcion si cumple con el mismo prototipo
                 (grantResults[0] == PackageManager.PERMISSION_GRANTED) -> getLastLocation(this::setupViewData)
-
-
                 else -> {
                     customSnackbar.showSnackbar(
                         R.string.permission_denied_explanation, R.string.settings
                     ) {
-                        // Construye el intent que muestra la ventana de configuración del app.
                         val intent = Intent().apply {
                             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                             data = Uri.fromParts("package", APPLICATION_ID, null)
@@ -268,6 +249,4 @@ class HomeFragment : Fragment() {
             }
         }
     }
-
-
 }

@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.utils
+package mx.kodemia.personalweather.core.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
