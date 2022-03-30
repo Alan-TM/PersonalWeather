@@ -1,6 +1,6 @@
-package mx.kodemia.personalweather.model.weather
+package mx.kodemia.personalweather.data.model.weather
 
-import mx.kodemia.personalweather.model.weather_daily.WeatherDaily
+import mx.kodemia.personalweather.data.model.weather_daily.WeatherDaily
 
 data class WeatherEntity(
     val current: Current,

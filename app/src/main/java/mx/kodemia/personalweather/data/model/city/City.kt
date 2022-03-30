@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather.model.city
+package mx.kodemia.personalweather.data.model.city
 
 data class City(
     val name: String,
