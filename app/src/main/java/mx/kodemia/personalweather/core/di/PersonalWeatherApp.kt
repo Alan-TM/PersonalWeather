@@ -1,4 +1,4 @@
-package mx.kodemia.personalweather
+package mx.kodemia.personalweather.core.di
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
