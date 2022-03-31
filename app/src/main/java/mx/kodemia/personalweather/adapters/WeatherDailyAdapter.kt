@@ -9,6 +9,7 @@ import mx.kodemia.personalweather.core.utils.showIconHelper
 
 class WeatherDailyAdapter(private val items: ArrayList<HashMap<String, String>>) :
     RecyclerView.Adapter<WeatherDailyAdapter.DailyViewHolder>() {
+
     class DailyViewHolder(private val binding: LayoutWeatherDailyBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun setInfo(item: HashMap<String, String>) {
@@ -19,7 +20,6 @@ class WeatherDailyAdapter(private val items: ArrayList<HashMap<String, String>>)
                 itemHumidityValue.text = item["humidity"]
                 itemWindValue.text = item["wind"]
             }
-
         }
     }
 

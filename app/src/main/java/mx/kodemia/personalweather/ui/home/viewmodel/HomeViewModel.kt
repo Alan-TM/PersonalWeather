@@ -6,6 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import mx.kodemia.personalweather.core.Constants
+import mx.kodemia.personalweather.core.Constants.ERROR_IO
+import mx.kodemia.personalweather.core.Constants.ERROR_NOT_FOUND
+import mx.kodemia.personalweather.core.Constants.ERROR_UNAUTHORIZED
 import mx.kodemia.personalweather.core.utils.capitalizeText
 import mx.kodemia.personalweather.core.utils.dayParser
 import mx.kodemia.personalweather.core.utils.hourParser
@@ -13,6 +17,9 @@ import mx.kodemia.personalweather.domain.GetCityUseCase
 import mx.kodemia.personalweather.domain.GetWeatherUseCase
 import mx.kodemia.personalweather.data.model.city.City
 import mx.kodemia.personalweather.data.model.weather.WeatherEntity
+import retrofit2.HttpException
+import retrofit2.Response
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,15 +30,21 @@ class HomeViewModel @Inject constructor(
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
+
     private val _cityResponse = MutableLiveData<City>()
     val cityResponse: LiveData<City> = _cityResponse
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> = _error
+
+    private val _errorCode = MutableLiveData<Int>()
+    val errorCode: LiveData<Int> = _errorCode
+
     private val _weatherDaily = MutableLiveData<ArrayList<HashMap<String, String>>>()
     val weatherDaily: LiveData<ArrayList<HashMap<String, String>>> = _weatherDaily
     private val _unitSymbol = MutableLiveData<String>()
     private val _weatherDataForView = MutableLiveData<HashMap<String, String>>()
     val weatherDataForView: LiveData<HashMap<String, String>> = _weatherDataForView
+
+    private val _hideToolbar = MutableLiveData<Boolean>(false)
+    val hideToolbar: LiveData<Boolean> = _hideToolbar
 
     private lateinit var preferencesCall: HashMap<String, String>
 
@@ -40,43 +53,44 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 preferencesCall.let {
-                    getCityByLocation(it["lat"]!!, it["lon"]!!)
-                    getWeatherByLocation(it["lat"]!!, it["lon"]!!, it["units"]!!, it["lang"]!!)
+                    val city = getCityByLocation(it["lat"]!!, it["lon"]!!)
+                    val weather = getWeatherByLocation(it["lat"]!!, it["lon"]!!, it["units"]!!, it["lang"]!!)
+
+                    if(city.isSuccessful && weather.isSuccessful){
+                        _cityResponse.value = city.body()!!.first()
+
+                        weather.body()?.let { weatherBody ->
+                            setDataForView(weatherBody)
+                            _weatherDaily.value = dailyWeather(weatherBody)
+                        }
+
+                        _isLoading.value = false
+                    } else{
+                        _errorCode.value = when(city.code()){
+                            401 -> ERROR_UNAUTHORIZED
+                            404 -> ERROR_NOT_FOUND
+                            else -> 0
+                        }
+                    }
                 }
-            } catch (e: Exception) {
-                _error.value = e.message
+            } catch (e: IOException) {
+                _errorCode.value = ERROR_IO
             }
-            _isLoading.value = false
         }
     }
 
-    private suspend fun getCityByLocation(latitude: String, longitude: String) {
-        val city = getCityUseCase(latitude, longitude)
-
-        if (city.isSuccessful) {
-            _cityResponse.value = city.body()!!.first()
-        } else {
-            _error.value = city.message()
-        }
-    }
+    private suspend fun getCityByLocation(
+        latitude: String,
+        longitude: String
+    ): Response<List<City>> = getCityUseCase(latitude, longitude)
 
     private suspend fun getWeatherByLocation(
         latitude: String,
         longitude: String,
         units: String,
         lang: String
-    ) {
-        val weather = getWeatherUseCase(latitude, longitude, units, lang)
+    ): Response<WeatherEntity> = getWeatherUseCase(latitude, longitude, units, lang)
 
-        if (weather.isSuccessful) {
-            weather.body()?.let {
-                setDataForView(it)
-                _weatherDaily.value = dailyWeather(it)
-            }
-        } else {
-            _error.value = weather.message()
-        }
-    }
 
     private fun dailyWeather(weather: WeatherEntity): ArrayList<HashMap<String, String>> {
         val dummyList = ArrayList<HashMap<String, String>>()
@@ -143,6 +157,14 @@ class HomeViewModel @Inject constructor(
             Pair("feelsLike", feelsLike),
             Pair("icon", icon),
         )
+    }
+
+    fun setErrorCode(code: Int){
+        _errorCode.value = code
+    }
+
+    fun setHideToolbar(hide: Boolean){
+        _hideToolbar.value = hide
     }
 }
 

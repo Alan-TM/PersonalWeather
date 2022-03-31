@@ -18,7 +18,7 @@
     <string name="no_internet_access">No cuentas con acceso a internet</string>
     <string name="updated">Actualizado:</string>
     <string name="sensation">Sensación: %s</string>
-    <string name="error_ocurred">Ocurrió un error al cargar</string>
+    <string name="error_ocurred">Ocurrió un error al cargar, intentalo de nuevo</string>
     <string name="updatedAt">Actualizado: %s</string>
     <string name="hello">Hola</string>
     <string name="canceled_action">Acción cancelada</string>
@@ -26,4 +26,7 @@
     <string name="settings_title">Ajustes</string>
     <string name="more_info">Más info</string>
     <string name="measure_metric">Unidad</string>
+    <string name="oops">Ups!</string>
+    <string name="unauthorized">Tu sesión no es validad. Por favor contactanos para resolver este problema !</string>
+    <string name="not_found">Lo sentimos, no pudimos encontrar tu localización</string>
 </resources>

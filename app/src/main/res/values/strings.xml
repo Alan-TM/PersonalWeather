@@ -18,7 +18,7 @@
     <string name="updated">Updated: "</string>
     <string name="city" translatable="false">%s, %s</string>
     <string name="sensation">Feels like: %s"</string>
-    <string name="error_ocurred">Error occurred when loading</string>
+    <string name="error_ocurred">Error occurred when loading, try again</string>
     <string name="updatedAt">Updated: %s</string>
     <string name="hello">Hello</string>
     <string name="canceled_action">Cancel action</string>
@@ -29,4 +29,7 @@
     <string name="wind_value" translatable="false">%s km/h</string>
     <string name="pressure_value" translatable="false">%s mb</string>
     <string name="humidity_value" translatable="false">%s</string>
+    <string name="oops">Oops!</string>
+    <string name="unauthorized">Your session is not valid. Please contact us to resolve this problem !</string>
+    <string name="not_found">Sorry, your location could not be found</string>
 </resources>

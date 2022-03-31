@@ -9,4 +9,8 @@ object Constants {
 
     const val REQUEST_PERMISSIONS_REQUEST_CODE = 34
 
+    const val ERROR_NO_INTERNET = 999
+    const val ERROR_IO = 900
+    const val ERROR_UNAUTHORIZED = 401
+    const val ERROR_NOT_FOUND = 404
 }

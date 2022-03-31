@@ -20,7 +20,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -29,6 +31,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import mx.kodemia.personalweather.BuildConfig.APPLICATION_ID
 import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.adapters.WeatherDailyAdapter
+import mx.kodemia.personalweather.core.Constants
+import mx.kodemia.personalweather.core.Constants.ERROR_IO
+import mx.kodemia.personalweather.core.Constants.ERROR_NOT_FOUND
+import mx.kodemia.personalweather.core.Constants.ERROR_NO_INTERNET
+import mx.kodemia.personalweather.core.Constants.ERROR_UNAUTHORIZED
 import mx.kodemia.personalweather.core.Constants.REQUEST_PERMISSIONS_REQUEST_CODE
 import mx.kodemia.personalweather.core.utils.CustomSnackbar
 import mx.kodemia.personalweather.core.utils.checkForInternet
@@ -45,7 +52,7 @@ class HomeFragment : Fragment() {
     private var sharedPrefUnits = false
     private var sharedPrefLanguage = false
 
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by activityViewModels()
 
     private lateinit var customSnackbar: CustomSnackbar
 
@@ -61,10 +68,9 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.setHideToolbar(false)
         customSnackbar = CustomSnackbar(requireActivity())
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
-
         permissionsSetup()
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
@@ -90,7 +96,7 @@ class HomeFragment : Fragment() {
                 }
             }
         } else {
-            showMessage(getString(R.string.no_internet_access))
+            viewModel.setErrorCode(ERROR_NO_INTERNET)
         }
     }
 
@@ -129,7 +135,14 @@ class HomeFragment : Fragment() {
                     applyAnimations()
             }
 
-            error.observe(viewLifecycleOwner, ::showMessage)
+            errorCode.observe(viewLifecycleOwner){ code ->
+                when(code){
+                    ERROR_NO_INTERNET -> findNavController().navigate(R.id.action_homeFragment_to_noInternetFragment)
+                    ERROR_IO -> showMessage(getString(R.string.error_ocurred))
+                    ERROR_UNAUTHORIZED -> customSnackbar.showSnackbar(R.string.unauthorized)
+                    ERROR_NOT_FOUND -> customSnackbar.showSnackbar(R.string.not_found)
+                }
+            }
         }
     }
 
