@@ -21,7 +21,6 @@ import androidx.core.content.PermissionChecker
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
@@ -31,19 +30,17 @@ import dagger.hilt.android.AndroidEntryPoint
 import mx.kodemia.personalweather.BuildConfig.APPLICATION_ID
 import mx.kodemia.personalweather.R
 import mx.kodemia.personalweather.adapters.WeatherDailyAdapter
-import mx.kodemia.personalweather.core.Constants
 import mx.kodemia.personalweather.core.Constants.ERROR_IO
 import mx.kodemia.personalweather.core.Constants.ERROR_NOT_FOUND
 import mx.kodemia.personalweather.core.Constants.ERROR_NO_INTERNET
 import mx.kodemia.personalweather.core.Constants.ERROR_UNAUTHORIZED
 import mx.kodemia.personalweather.core.Constants.REQUEST_PERMISSIONS_REQUEST_CODE
-import mx.kodemia.personalweather.core.utils.CustomSnackbar
+import mx.kodemia.personalweather.core.utils.CustomSnack
 import mx.kodemia.personalweather.core.utils.checkForInternet
 import mx.kodemia.personalweather.core.utils.showIconHelper
 import mx.kodemia.personalweather.databinding.FragmentHomeBinding
 import mx.kodemia.personalweather.ui.home.viewmodel.HomeViewModel
 
-@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -54,7 +51,7 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by activityViewModels()
 
-    private lateinit var customSnackbar: CustomSnackbar
+    private lateinit var customSnack: CustomSnack
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -69,7 +66,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.setHideToolbar(false)
-        customSnackbar = CustomSnackbar(requireActivity())
+        customSnack = CustomSnack(requireActivity())
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         permissionsSetup()
 
@@ -139,8 +136,8 @@ class HomeFragment : Fragment() {
                 when(code){
                     ERROR_NO_INTERNET -> findNavController().navigate(R.id.action_homeFragment_to_noInternetFragment)
                     ERROR_IO -> showMessage(getString(R.string.error_ocurred))
-                    ERROR_UNAUTHORIZED -> customSnackbar.showSnackbar(R.string.unauthorized)
-                    ERROR_NOT_FOUND -> customSnackbar.showSnackbar(R.string.not_found)
+                    ERROR_UNAUTHORIZED -> customSnack.showSnack(R.string.unauthorized)
+                    ERROR_NOT_FOUND -> customSnack.showSnack(R.string.not_found)
                 }
             }
         }
@@ -207,7 +204,7 @@ class HomeFragment : Fragment() {
                 if (taskLocation.isSuccessful && taskLocation.result != null) {
                     onLocation(taskLocation.result)
                 } else {
-                    customSnackbar.showSnackbar(R.string.no_location_detected)
+                    customSnack.showSnack(R.string.no_location_detected)
                 }
             }
     }
@@ -231,7 +228,7 @@ class HomeFragment : Fragment() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         ) {
-            customSnackbar.showSnackbar(R.string.permission_rationale, android.R.string.ok) {
+            customSnack.showSnack(R.string.permission_rationale, android.R.string.ok) {
                 startLocationPermissionRequest()
             }
         } else {
@@ -250,7 +247,7 @@ class HomeFragment : Fragment() {
                 grantResults.isEmpty() -> showMessage(getString(R.string.canceled_action))
                 (grantResults[0] == PackageManager.PERMISSION_GRANTED) -> getLastLocation(this::setupViewData)
                 else -> {
-                    customSnackbar.showSnackbar(
+                    customSnack.showSnack(
                         R.string.permission_denied_explanation, R.string.settings
                     ) {
                         val intent = Intent().apply {
